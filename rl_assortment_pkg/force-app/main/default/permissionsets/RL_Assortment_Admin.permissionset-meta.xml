@@ -37,6 +37,18 @@
         <allowRead>true</allowRead>
         <object>RL_Anaplan_Sync_Log__c</object>
     </objectPermissions>
+    <objectPermissions>
+        <allowCreate>false</allowCreate>
+        <allowDelete>false</allowDelete>
+        <allowEdit>false</allowEdit>
+        <allowRead>true</allowRead>
+        <object>Product2</object>
+    </objectPermissions>
+    <fieldPermissions>
+        <editable>false</editable>
+        <field>RL_Assortment_Line__c.Product__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
     <fieldPermissions>
         <editable>true</editable>
         <field>RL_Assortment_Line__c.Style_Number__c</field>

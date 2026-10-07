@@ -10,6 +10,7 @@ import lockAssortmentPlan   from '@salesforce/apex/RLAssortmentController.lockAs
 import generateShareToken   from '@salesforce/apex/RLAssortmentController.generateShareToken';
 import getSizeRuns          from '@salesforce/apex/RLAssortmentController.getSizeRunsForPlan';
 import convertToOrder       from '@salesforce/apex/RLAssortmentController.convertToOrder';
+// import createEmbeddedSigningEnvelope from '@salesforce/apex/DocuSignService.createEmbeddedSigningEnvelope';
 
 // ── Constants ─────────────────────────────────────────────────────────────────
 const SORT_SEQ      = 'seq';
@@ -94,6 +95,13 @@ export default class RlDataWedge extends NavigationMixin(LightningElement) {
     @track orderDeliveryDate  = '';
     @track orderNotes         = '';
     @track flaggedOption      = 'include';  // 'include' | 'exclude'
+
+    // ── DocuSign Signing state ────────────────────────────────────────────────
+    @track showSigningModal   = false;
+    @track signingUrl         = '';
+    @track envelopeId         = '';
+    @track isSigning          = false;
+    @track pendingOrderId     = '';  // Order ID waiting for signature
 
     connectedCallback() {
         // Ensure we have a recordId - use @api property or extract from URL
@@ -529,13 +537,40 @@ export default class RlDataWedge extends NavigationMixin(LightningElement) {
 
         this.isSaving = true;
         try {
+            // Create the order
             const orderId = await convertToOrder({
                 planId: this._effectiveRecordId,
                 selectedLineIds: selectedIds
             });
+
+            // TODO: Enable DocuSign signing when configured
+            // Uncomment below after setting up DocuSign API credentials
+
+            /*
+            // Store order ID and show signing modal
+            this.pendingOrderId = orderId;
+            this.isSigning = true;
+
+            // Initiate DocuSign signing
+            const signingResponse = await createEmbeddedSigningEnvelope({
+                orderId: orderId,
+                signerEmail: UserInfo.getUserEmail(),
+                signerName: UserInfo.getName()
+            });
+
+            this.signingUrl = signingResponse.signingUrl;
+            this.envelopeId = signingResponse.envelopeId;
+            this.showSigningModal = true;
+
+            this._toast('Sign Document', 'Please sign the order confirmation document.', 'info');
+            */
+
+            // For now, just create the order without signing
             this._toast('Success', `Order ${orderId} created with ${selectedIds.length} items.`, 'success');
             this.handleClearSelection();
-            // Optionally navigate to the new order
+            this.isSaving = false;
+
+            // Navigate to the order
             this[NavigationMixin.Navigate]({
                 type: 'standard__recordPage',
                 attributes: {
@@ -546,9 +581,32 @@ export default class RlDataWedge extends NavigationMixin(LightningElement) {
             });
         } catch (e) {
             this._toast('Error', e?.body?.message || 'Failed to create order.', 'error');
-        } finally {
             this.isSaving = false;
         }
+    }
+
+    handleSigningComplete() {
+        this.showSigningModal = false;
+        this._toast('Success', `Order ${this.pendingOrderId} created and signed.`, 'success');
+        this.handleClearSelection();
+        this.isSaving = false;
+
+        // Navigate to the order
+        this[NavigationMixin.Navigate]({
+            type: 'standard__recordPage',
+            attributes: {
+                recordId: this.pendingOrderId,
+                objectApiName: 'Order',
+                actionName: 'view'
+            }
+        });
+    }
+
+    handleSigningCancel() {
+        this.showSigningModal = false;
+        this.isSigning = false;
+        this.isSaving = false;
+        this._toast('Cancelled', 'Order signing was cancelled.', 'warning');
     }
 
     // ── Size run expand/collapse ───────────────────────────────────────────────

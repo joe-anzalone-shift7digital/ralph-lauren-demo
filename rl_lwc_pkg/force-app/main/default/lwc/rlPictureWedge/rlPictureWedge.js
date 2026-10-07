@@ -213,6 +213,11 @@ export default class RlPictureWedge extends NavigationMixin(LightningElement) {
     handleFilterTierB()  { this.activeFilter = FILTER_TIER_B; this._applyFilter(); }
     handleFilterTierC()  { this.activeFilter = FILTER_TIER_C; this._applyFilter(); }
 
+    handleImgError(evt) {
+        const url = evt.target.src;
+        console.error('❌ Image failed to load:', url);
+    }
+
     // ── View toggle ───────────────────────────────────────────────────────────
     handleViewPicture()  { this.activeView = VIEW_PICTURE; }
     handleViewData()     { this.activeView = VIEW_DATA; }

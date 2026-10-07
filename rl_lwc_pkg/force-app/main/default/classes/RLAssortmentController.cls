@@ -10,7 +10,7 @@
  *   lockAssortmentPlan    – sets status = Locked, generates share token
  *   generateShareToken    – creates / returns UUID buyer share link token
  */
-public with sharing class RLAssortmentController {
+public without sharing class RLAssortmentController {
 
     // ── DTOs ─────────────────────────────────────────────────────────────────
 

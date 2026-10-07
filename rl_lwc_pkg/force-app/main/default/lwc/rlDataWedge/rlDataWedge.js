@@ -9,7 +9,6 @@ import updateLineField      from '@salesforce/apex/RLAssortmentController.update
 import lockAssortmentPlan   from '@salesforce/apex/RLAssortmentController.lockAssortmentPlan';
 import generateShareToken   from '@salesforce/apex/RLAssortmentController.generateShareToken';
 import getSizeRuns          from '@salesforce/apex/RLAssortmentController.getSizeRunsForPlan';
-import convertToB2BOrder    from '@salesforce/apex/RLAssortmentController.convertAssortmentToOrder';
 
 // ── Constants ─────────────────────────────────────────────────────────────────
 const SORT_SEQ      = 'seq';
@@ -869,83 +868,6 @@ Include only styles in styleRecs that need specific action (below -5% variance, 
         });
 
         return parsed;
-    }
-
-    // ── Convert to Order ──────────────────────────────────────────────────────
-
-    handleConvertToOrder() {
-        this.convertSuccess   = false;
-        this.convertError     = null;
-        this.createdOrderId   = '';
-        this.orderPONumber    = '';
-        this.orderDeliveryDate= '';
-        this.orderNotes       = '';
-        this.flaggedOption    = 'include';
-        this.showConvertModal = true;
-    }
-
-    handleCloseConvert() {
-        if (this.convertSuccess) {
-            // Refresh the plan status after a successful conversion
-            this.handleRefresh();
-        }
-        this.showConvertModal = false;
-    }
-
-    handlePOChange(evt)           { this.orderPONumber     = evt.target.value; }
-    handleDeliveryDateChange(evt) { this.orderDeliveryDate = evt.target.value; }
-    handleOrderNotesChange(evt)   { this.orderNotes        = evt.target.value; }
-
-    handleFlaggedOption(evt) {
-        this.flaggedOption = evt.target.value;
-    }
-
-    async handleSubmitConvert() {
-        // Validate PO number required
-        if (!this.orderPONumber || this.orderPONumber.trim() === '') {
-            this._toast('Required', 'Please enter a Purchase Order Number before converting.', 'warning');
-            return;
-        }
-
-        this.isConverting = true;
-        this.convertError = null;
-
-        try {
-            // Build the list of line IDs to include
-            const lineIds = this._orderableLines.map(l => l.id);
-
-            const result = await convertToB2BOrder({
-                planId:          this.recordId,
-                lineIds:         JSON.stringify(lineIds),
-                poNumber:        this.orderPONumber.trim(),
-                deliveryDate:    this.orderDeliveryDate || null,
-                orderNotes:      this.orderNotes || null,
-                includeFlagged:  this.flaggedOption === 'include',
-            });
-
-            this.createdOrderId  = result;
-            this.convertSuccess  = true;
-            // Update local plan status
-            this.planStatus      = 'Converted to Order';
-            this._toast('Order created', `Order ${result} created successfully.`, 'success');
-        } catch (e) {
-            this.convertError = e?.body?.message || 'Order creation failed. Please try again.';
-            this._toast('Error', this.convertError, 'error');
-        } finally {
-            this.isConverting = false;
-        }
-    }
-
-    handleViewOrder() {
-        this.showConvertModal = false;
-        // Navigate to the created order record
-        this[NavigationMixin.Navigate]({
-            type: 'standard__recordPage',
-            attributes: {
-                recordId:   this.createdOrderId,
-                actionName: 'view',
-            },
-        });
     }
 
     // ── Helpers ───────────────────────────────────────────────────────────────

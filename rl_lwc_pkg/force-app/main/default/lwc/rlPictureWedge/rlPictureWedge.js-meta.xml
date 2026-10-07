@@ -8,6 +8,7 @@
         <target>lightning__AppPage</target>
         <target>lightning__Tab</target>
         <target>lightningCommunity__Page</target>
+        <target>lightningCommunity__Default</target>
     </targets>
     <targetConfigs>
         <targetConfig targets="lightning__RecordPage">
@@ -17,6 +18,15 @@
                 default="false"
                 label="Buyer mode (read-only)"
                 description="Set to true to render in read-only buyer mode for Experience Cloud pages. Sales reps see false (default)."
+            />
+        </targetConfig>
+        <targetConfig targets="lightningCommunity__Default">
+            <property
+                name="buyerMode"
+                type="Boolean"
+                default="false"
+                label="Buyer mode (read-only)"
+                description="Set to true to render in read-only buyer mode for Experience Cloud pages."
             />
         </targetConfig>
     </targetConfigs>

@@ -121,6 +121,7 @@ export default class RlDataWedge extends NavigationMixin(LightningElement) {
     // ── Wire: load size runs for the plan ─────────────────────────────────────
     @wire(getSizeRuns, { planId: '$_effectiveRecordId' })
     wiredSizes({ data, error }) {
+        this.isSizesLoading = false;
         if (data) {
             // Build map: lineId → sorted size records
             const map = {};
@@ -139,6 +140,10 @@ export default class RlDataWedge extends NavigationMixin(LightningElement) {
                 map[k].sort((a, b) => a.sortOrder - b.sortOrder);
             });
             this.sizeRunMap = map;
+            console.log('✓ Sizes loaded: ' + Object.keys(map).length + ' line groups');
+        } else if (error) {
+            console.warn('⚠️ Size runs failed to load (this is optional):', error);
+            this.sizeRunMap = {};
         }
     }
 

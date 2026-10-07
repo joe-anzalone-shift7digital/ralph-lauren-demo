@@ -149,11 +149,11 @@ public without sharing class RLAssortmentController {
 
     // ═════════════════════════════════════════════════════════════════════════
     // getSizeRunsForPlan
-    //   Wire-compatible (cacheable). Returns all RL_Size_Run__c records for
-    //   every line item in a plan. The LWC groups them client-side by lineId.
-    //   Called by rlDataWedge for the size-run drill-down rows.
+    //   Wire-compatible (cacheable=false due to LWC invocation issues).
+    //   Returns all RL_Size_Run__c records for every line item in a plan.
+    //   The LWC groups them client-side by lineId.
     // ═════════════════════════════════════════════════════════════════════════
-    @AuraEnabled(cacheable=true)
+    @AuraEnabled(cacheable=false)
     public static List<SizeRunDTO> getSizeRunsForPlan(Id planId) {
         if (planId == null) {
             return new List<SizeRunDTO>();

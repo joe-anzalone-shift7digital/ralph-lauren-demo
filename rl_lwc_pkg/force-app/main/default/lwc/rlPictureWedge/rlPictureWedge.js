@@ -68,9 +68,11 @@ export default class RlPictureWedge extends NavigationMixin(LightningElement) {
     wiredLines({ data, error }) {
         this.isLoading = false;
         if (data) {
+            console.log('📦 Wired data received:', JSON.stringify(data));
             this.error = null;
             this._processData(data);
         } else if (error) {
+            console.error('❌ Wire error:', error);
             this.error = error?.body?.message || 'Failed to load assortment data.';
         }
     }

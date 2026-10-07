@@ -362,12 +362,15 @@ public without sharing class RLAssortmentController {
         insert order;
 
         List<OrderItem> items = new List<OrderItem>();
+        Decimal defaultPrice = 0;
         for (RL_Assortment_Line__c line : lines) {
+            Decimal unitPrice = line.Wholesale_Unit_Cost__c != null ? line.Wholesale_Unit_Cost__c : defaultPrice;
             items.add(new OrderItem(
                 OrderId = order.Id,
                 Product2Id = line.Product__c,
                 Quantity = line.Planned_Units__c != null ? Integer.valueOf(line.Planned_Units__c) : 1,
-                UnitPrice = line.Wholesale_Unit_Cost__c != null ? line.Wholesale_Unit_Cost__c : 0
+                UnitPrice = unitPrice,
+                ListPrice = unitPrice
             ));
         }
 

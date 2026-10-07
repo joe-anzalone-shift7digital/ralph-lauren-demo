@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Shared_Date__c</fullName>
+    <description>DateTime when the secure link was sent to the buyer</description>
+    <label>Date Shared with Buyer</label>
+    <trackHistory>false</trackHistory>
+    
+    <type>DateTime</type>
+</CustomField>

@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Status__c</fullName>
+    <description>Result status of the sync event</description>
+    <label>Sync Status</label>
+    <trackHistory>false</trackHistory>
+    <valueSet>
+        <restricted>true</restricted>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+        <value>
+            <fullName>Success</fullName>
+            <default>false</default>
+            <label>Success</label>
+        </value>
+        <value>
+            <fullName>Partial Success</fullName>
+            <default>false</default>
+            <label>Partial Success</label>
+        </value>
+        <value>
+            <fullName>Failed</fullName>
+            <default>false</default>
+            <label>Failed</label>
+        </value>
+        <value>
+            <fullName>In Progress</fullName>
+            <default>false</default>
+            <label>In Progress</label>
+        </value>
+        </valueSetDefinition>
+    </valueSet>
+    <type>Picklist</type>
+</CustomField>

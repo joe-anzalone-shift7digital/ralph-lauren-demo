@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Buyer_Status__c</fullName>
+    <description>Buyer acceptance status for this style</description>
+    <label>Buyer Review Status</label>
+    <trackHistory>false</trackHistory>
+    <valueSet>
+        <restricted>true</restricted>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+        <value>
+            <fullName>Pending Review</fullName>
+            <default>false</default>
+            <label>Pending Review</label>
+        </value>
+        <value>
+            <fullName>Approved</fullName>
+            <default>false</default>
+            <label>Approved</label>
+        </value>
+        <value>
+            <fullName>Flagged for Discussion</fullName>
+            <default>false</default>
+            <label>Flagged for Discussion</label>
+        </value>
+        <value>
+            <fullName>Dropped</fullName>
+            <default>false</default>
+            <label>Dropped</label>
+        </value>
+        </valueSetDefinition>
+    </valueSet>
+    <type>Picklist</type>
+</CustomField>

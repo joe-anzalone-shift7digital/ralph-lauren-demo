@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Is_Hero_Override__c</fullName>
+    <description>Sales rep manually flagged as hero overriding Anaplan flag</description>
+    <label>Hero Override (Sales Rep)</label>
+    <trackHistory>false</trackHistory>
+    <defaultValue>false</defaultValue>
+    <type>Checkbox</type>
+</CustomField>

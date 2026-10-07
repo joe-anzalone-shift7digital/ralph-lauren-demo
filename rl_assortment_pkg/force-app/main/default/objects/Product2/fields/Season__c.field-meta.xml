@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Season__c</fullName>
+    <description>Primary selling season code e.g. AW26 SS27</description>
+    <label>Season</label>
+    <trackHistory>false</trackHistory>
+    <length>20</length>
+    <type>Text</type>
+</CustomField>

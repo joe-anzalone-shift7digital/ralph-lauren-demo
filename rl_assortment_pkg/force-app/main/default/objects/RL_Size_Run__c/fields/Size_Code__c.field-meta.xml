@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Size_Code__c</fullName>
+    <description>Size identifier e.g. XS S M L XL XXL 28 30 32 34 36</description>
+    <label>Size Code</label>
+    <trackHistory>false</trackHistory>
+    <length>10</length>
+    <type>Text</type>
+</CustomField>

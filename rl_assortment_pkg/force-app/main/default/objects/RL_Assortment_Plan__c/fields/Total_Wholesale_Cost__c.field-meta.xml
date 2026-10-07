@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Total_Wholesale_Cost__c</fullName>
+    <description>Extended wholesale cost roll-up across all line items</description>
+    <label>Total Planned Wholesale Cost</label>
+    <trackHistory>false</trackHistory>
+    <precision>18</precision><scale>2</scale>
+    <type>Currency</type>
+</CustomField>

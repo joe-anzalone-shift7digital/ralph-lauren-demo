@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Is_Active__c</fullName>
+    <description>Door is included and active in the current assortment plan</description>
+    <label>Active in Plan</label>
+    <trackHistory>false</trackHistory>
+    <defaultValue>true</defaultValue>
+    <type>Checkbox</type>
+</CustomField>

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Buyer_Email__c</fullName>
+    <description>Email address the share link was sent to</description>
+    <label>Buyer Email</label>
+    <trackHistory>false</trackHistory>
+    <length>255</length>
+    <type>Text</type>
+</CustomField>

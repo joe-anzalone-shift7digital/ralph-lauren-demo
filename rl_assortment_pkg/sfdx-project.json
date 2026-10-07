@@ -1,0 +1,15 @@
+{
+  "packageDirectories": [
+    {
+      "path": "force-app",
+      "default": true,
+      "package": "RL-Assortment-DataModel",
+      "versionName": "v1.0",
+      "versionNumber": "1.0.0.NEXT"
+    }
+  ],
+  "name": "RL-Assortment-DataModel",
+  "namespace": "",
+  "sfdcLoginUrl": "https://login.salesforce.com",
+  "sourceApiVersion": "62.0"
+}

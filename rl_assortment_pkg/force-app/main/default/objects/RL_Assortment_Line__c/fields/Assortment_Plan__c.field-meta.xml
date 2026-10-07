@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Assortment_Plan__c</fullName>
+    <description>Parent assortment plan (master-detail)</description>
+    <label>Assortment Plan</label>
+    <trackHistory>false</trackHistory>
+    <referenceTo>RL_Assortment_Plan__c</referenceTo><relationshipLabel>Assortment Plan</relationshipLabel><relationshipName>AssortmentLineItems</relationshipName><writeRequiresMasterRead>false</writeRequiresMasterRead>
+    <type>MasterDetail</type>
+</CustomField>

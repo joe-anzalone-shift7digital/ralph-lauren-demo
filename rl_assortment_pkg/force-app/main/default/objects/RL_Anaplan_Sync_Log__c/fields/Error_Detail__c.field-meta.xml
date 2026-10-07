@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Error_Detail__c</fullName>
+    <description>Full error message or stack trace if sync failed or partially failed</description>
+    <label>Error Detail</label>
+    <trackHistory>false</trackHistory>
+    <length>32768</length><visibleLines>5</visibleLines>
+    <type>LongTextArea</type>
+</CustomField>

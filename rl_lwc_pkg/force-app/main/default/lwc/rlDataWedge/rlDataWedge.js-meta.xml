@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LightningComponentBundle xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>66.0</apiVersion>
+    <isExposed>true</isExposed>
+    <description>Tabular assortment view with sortable columns, grouping, size run drill-down, buyer approval workflow, and CSV export.</description>
+    <targets>
+        <target>lightning__RecordPage</target>
+        <target>lightning__AppPage</target>
+        <target>lightning__Tab</target>
+        <target>lightningCommunity__Page</target>
+    </targets>
+    <targetConfigs>
+        <targetConfig targets="lightning__RecordPage,lightning__AppPage">
+            <property
+                name="buyerMode"
+                type="Boolean"
+                default="false"
+                label="Buyer mode (read-only)"
+                description="Set to true to render the read-only buyer portal view. Sales reps use false (default)."
+            />
+            <property
+                name="maxDoors"
+                type="Integer"
+                default="12"
+                label="Max doors in account network"
+                description="Used to scale the door distribution progress bar. Defaults to 12."
+            />
+        </targetConfig>
+    </targetConfigs>
+</LightningComponentBundle>

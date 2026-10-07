@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>AEM_Image_URL__c</fullName>
+    <description>CDN URL of the primary product image from Adobe Experience Manager</description>
+    <label>AEM Primary Image URL</label>
+    <trackHistory>false</trackHistory>
+    
+    <type>Url</type>
+</CustomField>

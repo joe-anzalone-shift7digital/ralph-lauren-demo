@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Display_Sequence__c</fullName>
+    <description>Sofia drag-and-drop display order. Set from Anaplan on first sync only. Subsequent syncs do not overwrite.</description>
+    <label>Display Sequence</label>
+    <trackHistory>false</trackHistory>
+    <precision>18</precision><scale>0</scale>
+    <type>Number</type>
+</CustomField>

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Style_Number__c</fullName>
+    <description>RL internal style number e.g. RL-A1240 synced from Anaplan</description>
+    <label>Style Number</label>
+    <trackHistory>false</trackHistory>
+    <length>30</length>
+    <type>Text</type>
+</CustomField>

@@ -1,0 +1,464 @@
+<template>
+    <div class="wedge-shell">
+
+        <!-- ── HEADER ──────────────────────────────────────────────────────── -->
+        <div class="wedge-header">
+            <div class="header-left">
+                <div class="plan-title">
+                    <button class="plan-name-link" onclick={handleOpenRecord}>{planName}</button>
+                    <span class={statusBadgeClass}>{planStatus}</span>
+                    <template if:true={isSaving}>
+                        <lightning-spinner size="x-small" alternative-text="Saving"></lightning-spinner>
+                    </template>
+                </div>
+                <div class="plan-meta">
+                    <span class="meta-chip">{accountName}</span>
+                    <span class="meta-chip season">{season}</span>
+                    <span class="meta-chip fob">{fob}</span>
+                    <template if:true={lastSync}>
+                        <span class="meta-sync">Synced from Anaplan · {lastSync}</span>
+                    </template>
+                </div>
+            </div>
+            <div class="header-right">
+                <!-- View toggle -->
+                <div class="view-toggle">
+                    <button class={pictureViewClass} onclick={handleViewPicture}>
+                        <lightning-icon icon-name="utility:image" size="x-small"></lightning-icon>
+                        Picture wedge
+                    </button>
+                    <button class={dataViewClass} onclick={handleViewData}>
+                        <lightning-icon icon-name="utility:table" size="x-small"></lightning-icon>
+                        Data wedge
+                    </button>
+                </div>
+                <!-- Actions -->
+                <template if:false={buyerMode}>
+                    <template if:false={isLocked}>
+                        <button class="action-btn" onclick={handleShare} disabled={isSaving}>
+                            <lightning-icon icon-name="utility:share" size="x-small"></lightning-icon>
+                            Share with buyer
+                        </button>
+                        <button class="action-btn lock-btn" onclick={handleLock} disabled={isSaving}>
+                            <lightning-icon icon-name="utility:lock" size="x-small"></lightning-icon>
+                            Lock assortment
+                        </button>
+                    </template>
+                    <template if:true={isLocked}>
+                        <span class="locked-label">
+                            <lightning-icon icon-name="utility:lock" size="x-small"></lightning-icon>
+                            Locked
+                        </span>
+                    </template>
+                </template>
+                <button class="icon-btn" onclick={handleRefresh} title="Refresh from Anaplan">
+                    <lightning-icon icon-name="utility:refresh" size="x-small"></lightning-icon>
+                </button>
+            </div>
+        </div>
+
+        <!-- ── KPI STRIP ────────────────────────────────────────────────────── -->
+        <div class="kpi-strip">
+            <div class="kpi-block">
+                <span class="kpi-val">{styleCount}</span>
+                <span class="kpi-label">Styles</span>
+            </div>
+            <div class="kpi-divider"></div>
+            <div class="kpi-block">
+                <span class="kpi-val">{totalUnits}</span>
+                <span class="kpi-label">Planned units</span>
+            </div>
+            <div class="kpi-divider"></div>
+            <div class="kpi-block">
+                <span class="kpi-val">{totalCost}</span>
+                <span class="kpi-label">Wholesale cost</span>
+            </div>
+            <div class="kpi-spacer"></div>
+            <!-- Filter pills -->
+            <div class="filter-row">
+                <span class="filter-label">Filter:</span>
+                <button class="filter-pill" class.active={filterAll} onclick={handleFilterAll}>All</button>
+                <button class="filter-pill" class.active={filterHero} onclick={handleFilterHero}>Hero styles</button>
+                <button class="filter-pill" class.active={filterTierA} onclick={handleFilterTierA}>Tier A</button>
+                <button class="filter-pill" class.active={filterTierB} onclick={handleFilterTierB}>Tier B</button>
+                <button class="filter-pill" class.active={filterTierC} onclick={handleFilterTierC}>Tier C</button>
+            </div>
+        </div>
+
+        <!-- ── DRAG HINT (picture view, not read-only) ──────────────────────── -->
+        <template if:true={isPictureView}>
+            <template if:false={isReadOnly}>
+                <div class="drag-hint">
+                    <lightning-icon icon-name="utility:drag_and_drop" size="x-small"></lightning-icon>
+                    Drag cards to resequence the assortment presentation order
+                </div>
+            </template>
+        </template>
+
+        <!-- ── LOADING STATE ────────────────────────────────────────────────── -->
+        <template if:true={isLoading}>
+            <div class="loading-state">
+                <lightning-spinner size="medium" alternative-text="Loading assortment data"></lightning-spinner>
+                <p>Loading assortment from Anaplan…</p>
+            </div>
+        </template>
+
+        <!-- ── ERROR STATE ───────────────────────────────────────────────────── -->
+        <template if:true={error}>
+            <div class="error-state">
+                <lightning-icon icon-name="utility:error" size="small" variant="error"></lightning-icon>
+                <p>{error}</p>
+            </div>
+        </template>
+
+        <!-- ── EMPTY STATE ───────────────────────────────────────────────────── -->
+        <template if:true={showEmptyState}>
+            <div class="empty-state">
+                <lightning-icon icon-name="utility:filter" size="medium"></lightning-icon>
+                <p>No styles match this filter.</p>
+                <button class="filter-pill" onclick={handleFilterAll}>Show all styles</button>
+            </div>
+        </template>
+
+        <!-- ══════════════════════════════════════════════════════════════════ -->
+        <!-- PICTURE WEDGE VIEW                                                 -->
+        <!-- ══════════════════════════════════════════════════════════════════ -->
+        <template if:true={isPictureView}>
+            <template if:false={isLoading}>
+                <div class="picture-grid">
+                    <template for:each={filteredLines} for:item="line" for:index="index">
+                        <div
+                            key={line.id}
+                            class="wedge-card"
+                            data-id={line.id}
+                            data-index={index}
+                            draggable="{!isReadOnly}"
+                            ondragstart={handleDragStart}
+                            ondragover={handleDragOver}
+                            ondragleave={handleDragLeave}
+                            ondrop={handleDrop}
+                            ondragend={handleDragEnd}
+                        >
+                            <!-- Hero ribbon -->
+                            <template if:true={line.isHero}>
+                                <div class="hero-ribbon">HERO</div>
+                            </template>
+
+                            <!-- Sequence badge -->
+                            <div class="seq-badge">{line.seq}</div>
+
+                            <!-- Product image -->
+                            <div class="card-image-wrap">
+                                <template if:true={line.imageUrl}>
+                                    <img
+                                        src={line.imageUrl}
+                                        alt={line.productName}
+                                        class="card-image"
+                                        onerror={handleImgError}
+                                    />
+                                </template>
+                                <template if:false={line.imageUrl}>
+                                    <div class="card-image-placeholder">
+                                        <lightning-icon icon-name="utility:image" size="large"></lightning-icon>
+                                    </div>
+                                </template>
+                                <!-- Drag handle (shown on hover, non-read-only) -->
+                                <template if:false={isReadOnly}>
+                                    <div class="drag-handle" title="Drag to reorder">
+                                        <lightning-icon icon-name="utility:drag_and_drop" size="x-small"></lightning-icon>
+                                    </div>
+                                </template>
+                            </div>
+
+                            <!-- Card body -->
+                            <div class="card-body">
+                                <div class="card-style-row">
+                                    <span class="style-num">{line.styleNumber}</span>
+                                    <span class={line.tierClass}>{line.tier}</span>
+                                </div>
+                                <div class="card-name">{line.productName}</div>
+                                <div class="card-colorway">{line.colorway}</div>
+
+                                <!-- Metrics row -->
+                                <div class="card-metrics">
+                                    <div class="metric">
+                                        <span class="metric-val">{line.plannedUnits}</span>
+                                        <span class="metric-label">units</span>
+                                    </div>
+                                    <div class="metric">
+                                        <span class="metric-val {line.varianceClass}">{line.variancePct}</span>
+                                        <span class="metric-label">vs target</span>
+                                    </div>
+                                    <div class="metric">
+                                        <span class="metric-val">{line.doorCount}</span>
+                                        <span class="metric-label">doors</span>
+                                    </div>
+                                </div>
+
+                                <!-- Progress bar (plan vs target) -->
+                                <div class="progress-track">
+                                    <div class="progress-fill" style={line.progressStyle}></div>
+                                </div>
+                                <div class="delivery-tag">{line.deliveryWindow}</div>
+
+                                <!-- Buyer status badge (buyer mode) -->
+                                <template if:true={buyerMode}>
+                                    <div class="buyer-actions">
+                                        <button
+                                            class="buyer-btn approve"
+                                            data-id={line.id}
+                                            data-status="Approved"
+                                            onclick={handleBuyerStatus}
+                                        >Approve</button>
+                                        <button
+                                            class="buyer-btn flag"
+                                            data-id={line.id}
+                                            data-status="Flagged for Discussion"
+                                            onclick={handleBuyerStatus}
+                                        >Flag</button>
+                                        <button
+                                            class="buyer-btn drop"
+                                            data-id={line.id}
+                                            data-status="Dropped"
+                                            onclick={handleBuyerStatus}
+                                        >Drop</button>
+                                    </div>
+                                    <span class={line.buyerStatusClass}>{line.buyerStatus}</span>
+                                </template>
+
+                                <!-- Sales rep actions (internal mode) -->
+                                <template if:false={buyerMode}>
+                                    <div class="card-actions">
+                                        <template if:false={isReadOnly}>
+                                            <button
+                                                class="card-action-btn"
+                                                class.hero-active={line.isHero}
+                                                data-id={line.id}
+                                                onclick={handleToggleHero}
+                                            >
+                                                <template lwc:if={line.isHero}>
+                                                    <span title="Remove hero flag">
+                                                        <lightning-icon
+                                                            icon-name="utility:starred"
+                                                            size="x-small"
+                                                        ></lightning-icon>
+                                                    </span>
+                                                </template>
+                                                <template lwc:else>
+                                                    <span title="Mark as hero style">
+                                                        <lightning-icon
+                                                            icon-name="utility:starred"
+                                                            size="x-small"
+                                                        ></lightning-icon>
+                                                    </span>
+                                                </template>
+                                            </button>
+                                        </template>
+                                        <button
+                                            class="card-action-btn"
+                                            data-id={line.id}
+                                            onclick={handleOpenNote}
+                                        >
+                                            <template lwc:if={line.salesRepNote}>
+                                                <lightning-icon
+                                                    title="Edit note"
+                                                    icon-name="utility:note"
+                                                    size="x-small"
+                                                ></lightning-icon>
+                                            </template>
+                                            <template lwc:else>
+                                                <lightning-icon
+                                                    title="Add note"
+                                                    icon-name="utility:add"
+                                                    size="x-small"
+                                                ></lightning-icon>
+                                            </template>
+                                        </button>
+                                        <!-- Buyer status indicator -->
+                                        <template if:true={line.buyerNote}>
+                                            <span class={line.buyerStatusClass}>{line.buyerStatus}</span>
+                                        </template>
+                                    </div>
+                                    <!-- Note preview -->
+                                    <template if:true={line.salesRepNote}>
+                                        <div class="note-preview">📝 {line.salesRepNote}</div>
+                                    </template>
+                                </template>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+            </template>
+        </template>
+
+        <!-- ══════════════════════════════════════════════════════════════════ -->
+        <!-- DATA WEDGE VIEW                                                    -->
+        <!-- ══════════════════════════════════════════════════════════════════ -->
+        <template if:true={isDataView}>
+            <template if:false={isLoading}>
+                <div class="data-table-wrap">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th class="col-seq">#</th>
+                                <th class="col-style">Style</th>
+                                <th class="col-tier">Tier</th>
+                                <th class="col-num right">Plan units</th>
+                                <th class="col-num right">Target</th>
+                                <th class="col-num right">Variance</th>
+                                <th class="col-num right">Unit cost</th>
+                                <th class="col-num right">Ext. cost</th>
+                                <th class="col-doors">Doors</th>
+                                <th class="col-delivery">Delivery</th>
+                                <th class="col-note">Note</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <template for:each={filteredLines} for:item="line">
+                                <tr key={line.id} class="data-row" class.hero-row={line.isHero}>
+                                    <td class="col-seq muted">{line.seq}</td>
+                                    <td class="col-style">
+                                        <div class="data-style-cell">
+                                            <template if:true={line.imageUrl}>
+                                                <img src={line.imageUrl} alt="" class="data-thumb" />
+                                            </template>
+                                            <template if:false={line.imageUrl}>
+                                                <div class="data-thumb-placeholder"></div>
+                                            </template>
+                                            <div class="data-style-info">
+                                                <span class="style-num">{line.styleNumber}</span>
+                                                <template if:true={line.isHero}>
+                                                    <lightning-icon icon-name="utility:starred" size="x-small" class="hero-icon"></lightning-icon>
+                                                </template>
+                                                <div class="data-style-name">{line.productName}</div>
+                                                <div class="data-colorway">{line.colorway}</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="col-tier"><span class={line.tierClass}>{line.tier}</span></td>
+                                    <td class="col-num right bold">{line.plannedUnits}</td>
+                                    <td class="col-num right muted">{line.targetUnits}</td>
+                                    <td class="col-num right">
+                                        <span class={line.varianceClass}>{line.variancePct}</span>
+                                    </td>
+                                    <td class="col-num right muted">${line.unitCost}</td>
+                                    <td class="col-num right bold">${line.extCostFormatted}</td>
+                                    <td class="col-doors">
+                                        <div class="door-bar-wrap">
+                                            <div class="door-bar-track">
+                                                <div class="door-bar-fill" style={line.doorBarStyle}></div>
+                                            </div>
+                                            <span class="door-count muted">{line.doorCount}</span>
+                                        </div>
+                                    </td>
+                                    <td class="col-delivery muted">{line.deliveryWindow}</td>
+                                    <td class="col-note">
+                                        <template if:false={isReadOnly}>
+                                            <button
+                                                class="note-btn"
+                                                data-id={line.id}
+                                                onclick={handleOpenNote}
+                                                title="Add / edit note"
+                                            >
+                                                <template lwc:if={line.salesRepNote}>
+                                                    <lightning-icon
+                                                        icon-name="utility:note"
+                                                        size="x-small"
+                                                    ></lightning-icon>
+                                                </template>
+                                                <template lwc:else>
+                                                    <lightning-icon
+                                                        icon-name="utility:add"
+                                                        size="x-small"
+                                                    ></lightning-icon>
+                                                </template>
+                                            </button>
+                                        </template>
+                                        <template if:true={line.salesRepNote}>
+                                            <span class="note-preview-inline" title={line.salesRepNote}>📝</span>
+                                        </template>
+                                    </td>
+                                </tr>
+                            </template>
+                        </tbody>
+                        <tfoot>
+                            <tr class="total-row">
+                                <td colspan="3" class="total-label">Total — {styleCount} styles</td>
+                                <td class="col-num right bold">{totalUnits}</td>
+                                <td colspan="3"></td>
+                                <td class="col-num right bold">{totalCost}</td>
+                                <td colspan="3"></td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </template>
+        </template>
+
+        <!-- ══════════════════════════════════════════════════════════════════ -->
+        <!-- NOTE MODAL                                                          -->
+        <!-- ══════════════════════════════════════════════════════════════════ -->
+        <template if:true={showNoteModal}>
+            <section class="modal-overlay" role="dialog" aria-modal="true" aria-label="Add annotation">
+                <div class="modal-box">
+                    <div class="modal-header">
+                        <h2 class="modal-title">Sales rep annotation</h2>
+                        <button class="modal-close" onclick={handleCloseNote} title="Close">
+                            <lightning-icon icon-name="utility:close" size="x-small"></lightning-icon>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <p class="modal-style-label">{editingLine.styleNumber} — {editingLine.productName}</p>
+                        <lightning-textarea
+                            label="Note"
+                            value={noteValue}
+                            onchange={handleNoteChange}
+                            placeholder="Add a note for this style — e.g. buyer asked about this last season, colour may change..."
+                            max-length="2000"
+                        ></lightning-textarea>
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn-secondary" onclick={handleCloseNote}>Cancel</button>
+                        <button class="btn-primary" onclick={handleSaveNote}>Save note</button>
+                    </div>
+                </div>
+            </section>
+        </template>
+
+        <!-- ══════════════════════════════════════════════════════════════════ -->
+        <!-- SHARE MODAL                                                         -->
+        <!-- ══════════════════════════════════════════════════════════════════ -->
+        <template if:true={showShareModal}>
+            <section class="modal-overlay" role="dialog" aria-modal="true" aria-label="Share assortment">
+                <div class="modal-box">
+                    <div class="modal-header">
+                        <h2 class="modal-title">Share with buyer</h2>
+                        <button class="modal-close" onclick={handleCloseShare} title="Close">
+                            <lightning-icon icon-name="utility:close" size="x-small"></lightning-icon>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <p class="modal-share-note">
+                            Copy this secure link and send it to the buyer. They will see a read-only
+                            version of the assortment in picture wedge format with the ability to
+                            approve, flag, or drop styles.
+                        </p>
+                        <div class="share-url-box">
+                            <input type="text" readonly value={shareUrl} class="share-url-input" />
+                            <button class="btn-primary" onclick={handleCopyLink}>Copy link</button>
+                        </div>
+                        <p class="share-hint">
+                            <lightning-icon icon-name="utility:info" size="x-small"></lightning-icon>
+                            This link is unique to this assortment plan. Once you lock the assortment,
+                            the buyer will not be able to see further changes.
+                        </p>
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn-secondary" onclick={handleCloseShare}>Close</button>
+                    </div>
+                </div>
+            </section>
+        </template>
+
+    </div>
+</template>

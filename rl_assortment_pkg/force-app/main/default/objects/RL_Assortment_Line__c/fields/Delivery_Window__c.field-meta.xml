@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Delivery_Window__c</fullName>
+    <description>Delivery window code e.g. DLV1-Aug DLV2-Oct</description>
+    <label>Delivery Window</label>
+    <trackHistory>false</trackHistory>
+    <length>30</length>
+    <type>Text</type>
+</CustomField>

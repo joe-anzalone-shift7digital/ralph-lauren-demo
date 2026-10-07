@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Shared_Link_Token__c</fullName>
+    <description>UUID token appended to the Experience Cloud buyer URL for access control</description>
+    <label>Buyer Share Token</label>
+    <trackHistory>false</trackHistory>
+    <length>255</length>
+    <type>Text</type>
+</CustomField>

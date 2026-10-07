@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Account__c</fullName>
+    <description>Wholesale account this plan belongs to</description>
+    <label>Account</label>
+    <trackHistory>false</trackHistory>
+    <referenceTo>Account</referenceTo><relationshipLabel>Account</relationshipLabel><relationshipName>AssortmentPlans</relationshipName>
+    <type>Lookup</type>
+</CustomField>

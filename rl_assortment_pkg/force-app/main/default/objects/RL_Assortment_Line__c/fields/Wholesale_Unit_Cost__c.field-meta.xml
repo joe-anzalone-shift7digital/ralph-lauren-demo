@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Wholesale_Unit_Cost__c</fullName>
+    <description>Unit wholesale cost sourced from SAP via Anaplan</description>
+    <label>Wholesale Unit Cost</label>
+    <trackHistory>false</trackHistory>
+    <precision>18</precision><scale>2</scale>
+    <type>Currency</type>
+</CustomField>

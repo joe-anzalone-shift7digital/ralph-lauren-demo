@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>FOB__c</fullName>
+    <description>Ralph Lauren Family of Business</description>
+    <label>Family of Business</label>
+    <trackHistory>false</trackHistory>
+    <valueSet>
+        <restricted>true</restricted>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+        <value>
+            <fullName>Outerwear</fullName>
+            <default>false</default>
+            <label>Outerwear</label>
+        </value>
+        <value>
+            <fullName>Knitwear</fullName>
+            <default>false</default>
+            <label>Knitwear</label>
+        </value>
+        <value>
+            <fullName>Bottoms</fullName>
+            <default>false</default>
+            <label>Bottoms</label>
+        </value>
+        <value>
+            <fullName>Accessories</fullName>
+            <default>false</default>
+            <label>Accessories</label>
+        </value>
+        <value>
+            <fullName>Footwear</fullName>
+            <default>false</default>
+            <label>Footwear</label>
+        </value>
+        <value>
+            <fullName>Home</fullName>
+            <default>false</default>
+            <label>Home</label>
+        </value>
+        <value>
+            <fullName>Golf</fullName>
+            <default>false</default>
+            <label>Golf</label>
+        </value>
+        <value>
+            <fullName>Childrenswear</fullName>
+            <default>false</default>
+            <label>Childrenswear</label>
+        </value>
+        </valueSetDefinition>
+    </valueSet>
+    <type>Picklist</type>
+</CustomField>

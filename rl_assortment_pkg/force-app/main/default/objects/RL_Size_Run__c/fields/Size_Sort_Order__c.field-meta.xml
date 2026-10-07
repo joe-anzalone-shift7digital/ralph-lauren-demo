@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Size_Sort_Order__c</fullName>
+    <description>Display order of sizes in the size run grid (1=first)</description>
+    <label>Sort Order</label>
+    <trackHistory>false</trackHistory>
+    <precision>18</precision><scale>0</scale>
+    <type>Number</type>
+</CustomField>

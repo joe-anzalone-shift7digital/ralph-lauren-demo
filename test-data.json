@@ -1,0 +1,43 @@
+{
+  "records": [
+    {
+      "attributes": {
+        "type": "RL_Assortment_Plan__c"
+      },
+      "Name": "Spring-2025-N",
+      "Region__c": "North",
+      "Season__c": "Spring 2025",
+      "FOB__c": "Shanghai",
+      "Status__c": "Draft",
+      "Total_Planned_Units__c": 50000,
+      "Total_Target_Units__c": 45000,
+      "Total_Wholesale_Cost__c": 1500000
+    },
+    {
+      "attributes": {
+        "type": "RL_Assortment_Plan__c"
+      },
+      "Name": "Summer-2025-S",
+      "Region__c": "South",
+      "Season__c": "Summer 2025",
+      "FOB__c": "Vietnam",
+      "Status__c": "InProgress",
+      "Total_Planned_Units__c": 75000,
+      "Total_Target_Units__c": 70000,
+      "Total_Wholesale_Cost__c": 2100000
+    },
+    {
+      "attributes": {
+        "type": "RL_Assortment_Plan__c"
+      },
+      "Name": "Fall-2025-E",
+      "Region__c": "East",
+      "Season__c": "Fall 2025",
+      "FOB__c": "India",
+      "Status__c": "Planning",
+      "Total_Planned_Units__c": 60000,
+      "Total_Target_Units__c": 55000,
+      "Total_Wholesale_Cost__c": 1800000
+    }
+  ]
+}

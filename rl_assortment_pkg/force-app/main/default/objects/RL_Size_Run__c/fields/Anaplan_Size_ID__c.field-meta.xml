@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Anaplan_Size_ID__c</fullName>
+    <description>External key for Anaplan size break upsert</description>
+    <label>Anaplan Size ID</label>
+    <trackHistory>false</trackHistory>
+    <length>50</length>
+    <type>Text</type>
+</CustomField>

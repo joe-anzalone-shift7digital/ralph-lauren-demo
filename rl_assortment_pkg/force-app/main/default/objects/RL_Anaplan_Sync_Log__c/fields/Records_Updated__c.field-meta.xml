@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Records_Updated__c</fullName>
+    <description>Number of existing line item records updated</description>
+    <label>Records Updated</label>
+    <trackHistory>false</trackHistory>
+    <precision>18</precision><scale>0</scale>
+    <type>Number</type>
+</CustomField>

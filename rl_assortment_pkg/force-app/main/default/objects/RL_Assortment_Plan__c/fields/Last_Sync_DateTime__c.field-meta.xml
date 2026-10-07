@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Last_Sync_DateTime__c</fullName>
+    <description>Timestamp of the most recent successful Anaplan data sync</description>
+    <label>Last Anaplan Sync</label>
+    <trackHistory>false</trackHistory>
+    
+    <type>DateTime</type>
+</CustomField>

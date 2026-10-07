@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Is_Core_Size__c</fullName>
+    <description>Core size highlighted in the data wedge size grid</description>
+    <label>Core Size</label>
+    <trackHistory>false</trackHistory>
+    <defaultValue>false</defaultValue>
+    <type>Checkbox</type>
+</CustomField>

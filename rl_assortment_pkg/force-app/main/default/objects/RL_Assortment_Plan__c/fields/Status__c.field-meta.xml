@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Status__c</fullName>
+    <description>Workflow lifecycle status of this assortment plan</description>
+    <label>Plan Status</label>
+    <trackHistory>false</trackHistory>
+    <valueSet>
+        <restricted>true</restricted>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+        <value>
+            <fullName>Draft</fullName>
+            <default>false</default>
+            <label>Draft</label>
+        </value>
+        <value>
+            <fullName>In Review</fullName>
+            <default>false</default>
+            <label>In Review</label>
+        </value>
+        <value>
+            <fullName>Shared with Buyer</fullName>
+            <default>false</default>
+            <label>Shared with Buyer</label>
+        </value>
+        <value>
+            <fullName>Locked</fullName>
+            <default>false</default>
+            <label>Locked</label>
+        </value>
+        <value>
+            <fullName>Converted to Order</fullName>
+            <default>false</default>
+            <label>Converted to Order</label>
+        </value>
+        </valueSetDefinition>
+    </valueSet>
+    <type>Picklist</type>
+</CustomField>

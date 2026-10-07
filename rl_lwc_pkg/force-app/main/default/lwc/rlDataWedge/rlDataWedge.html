@@ -1,0 +1,825 @@
+<template>
+<div class="dw-shell">
+
+    <!-- ═══════════════════════════════════════════════════════════════════════
+         HEADER
+    ════════════════════════════════════════════════════════════════════════ -->
+    <div class="dw-header">
+        <div class="dw-header-left">
+            <div class="dw-title-row">
+                <button class="plan-link" onclick={handleOpenRecord}>{planName}</button>
+                <span class={statusBadgeClass}>{planStatus}</span>
+                <template if:true={isSaving}>
+                    <lightning-spinner size="x-small" alternative-text="Saving"></lightning-spinner>
+                </template>
+            </div>
+            <div class="dw-meta">
+                <span class="meta-pill account">{accountName}</span>
+                <span class="meta-pill season">{season}</span>
+                <span class="meta-pill fob">{fob}</span>
+                <template if:true={lastSync}>
+                    <span class="sync-label">
+                        <lightning-icon icon-name="utility:sync" size="x-small"></lightning-icon>
+                        Anaplan · {lastSync}
+                    </span>
+                </template>
+            </div>
+        </div>
+        <div class="dw-header-right">
+            <!-- Lock & share — not in buyer mode -->
+            <template if:false={buyerMode}>
+                <template if:false={isLocked}>
+                    <button class="hbtn share" onclick={handleShare} disabled={isSaving}>
+                        <lightning-icon icon-name="utility:share" size="x-small"></lightning-icon>
+                        Share
+                    </button>
+                    <button class="hbtn lock" onclick={handleLock} disabled={isSaving}>
+                        <lightning-icon icon-name="utility:lock" size="x-small"></lightning-icon>
+                        Lock
+                    </button>
+                </template>
+                <template if:true={isLocked}>
+                    <span class="locked-chip">
+                        <lightning-icon icon-name="utility:lock" size="x-small"></lightning-icon>
+                        Locked
+                    </span>
+                </template>
+            </template>
+            <!-- Analyze Gaps — AI powered -->
+            <button class="hbtn analyze" onclick={handleAnalyzeGaps} disabled={isAnalyzing} title="AI gap analysis">
+                <template if:false={isAnalyzing}>
+                    <lightning-icon icon-name="utility:einstein" size="x-small"></lightning-icon>
+                    Analyze Gaps
+                </template>
+                <template if:true={isAnalyzing}>
+                    <lightning-spinner size="x-small" alternative-text="Analyzing…"></lightning-spinner>
+                    Analyzing…
+                </template>
+            </button>
+            <!-- Convert to Order -->
+            <template if:false={buyerMode}>
+                <button
+                    class="hbtn convert"
+                    onclick={handleConvertToOrder}
+                    disabled={isConverting}
+                    title="Convert assortment to B2B Commerce order"
+                >
+                    <template if:false={isConverting}>
+                        <lightning-icon icon-name="utility:cart" size="x-small"></lightning-icon>
+                        Convert to Order
+                    </template>
+                    <template if:true={isConverting}>
+                        <lightning-spinner size="x-small" alternative-text="Converting…"></lightning-spinner>
+                        Converting…
+                    </template>
+                </button>
+            </template>
+            <button class="hbtn-icon" onclick={handleExportCsv} title="Export to CSV">
+                <lightning-icon icon-name="utility:download" size="x-small"></lightning-icon>
+            </button>
+            <button class="hbtn-icon" onclick={handleRefresh} title="Refresh from Anaplan">
+                <lightning-icon icon-name="utility:refresh" size="x-small"></lightning-icon>
+            </button>
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════════════════════
+         KPI SUMMARY STRIP
+    ════════════════════════════════════════════════════════════════════════ -->
+    <div class="kpi-strip">
+        <div class="kpi">
+            <div class="kpi-val">{totalStyles}</div>
+            <div class="kpi-lbl">Styles</div>
+        </div>
+        <div class="kpi-div"></div>
+        <div class="kpi">
+            <div class="kpi-val">{totalUnits}</div>
+            <div class="kpi-lbl">Planned units</div>
+        </div>
+        <div class="kpi-div"></div>
+        <div class="kpi">
+            <div class="kpi-val">{totalCost}</div>
+            <div class="kpi-lbl">Wholesale cost</div>
+        </div>
+        <div class="kpi-div"></div>
+        <div class="kpi">
+            <div class={totalVsTargetKpiClass}>{totalVsTarget}</div>
+            <div class="kpi-lbl">vs. plan target</div>
+        </div>
+        <div class="kpi-div"></div>
+        <div class="kpi">
+            <div class="kpi-val">{heroCount}</div>
+            <div class="kpi-lbl">Hero styles</div>
+        </div>
+        <div class="kpi-div"></div>
+        <div class="kpi">
+            <div class="kpi-val" class.warn={belowTargetCount > 0}>{belowTargetCount}</div>
+            <div class="kpi-lbl">Below target &gt;5%</div>
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════════════════════
+         TOOLBAR
+    ════════════════════════════════════════════════════════════════════════ -->
+    <div class="dw-toolbar">
+        <!-- Search -->
+        <div class="search-wrap">
+            <lightning-icon icon-name="utility:search" size="x-small" class="search-icon"></lightning-icon>
+            <input
+                type="text"
+                class="search-input"
+                placeholder="Search style, product name, colorway…"
+                onchange={handleSearch}
+                value={searchTerm}
+            />
+        </div>
+
+        <div class="toolbar-sep"></div>
+
+        <!-- Filter pills -->
+        <span class="toolbar-label">Filter:</span>
+        <button class="fpill" class.on={fa} onclick={handleFilterAll}>All</button>
+        <button class="fpill" class.on={fh} onclick={handleFilterHero}>
+            ⭐ Hero ({heroCount})
+        </button>
+        <button class="fpill warn" class.on={fb} onclick={handleFilterBelow}>
+            ⚠ Below target ({belowTargetCount})
+        </button>
+        <button class="fpill" class.on={fta} class.tier-a-pill={fta} onclick={handleFilterTierA}>Tier A</button>
+        <button class="fpill" class.on={ftb} class.tier-b-pill={ftb} onclick={handleFilterTierB}>Tier B</button>
+        <button class="fpill" class.on={ftc} onclick={handleFilterTierC}>Tier C</button>
+
+        <div class="toolbar-spacer"></div>
+
+        <!-- Group by tabs -->
+        <span class="toolbar-label">Group:</span>
+        <div class="group-tabs">
+            <button class="gtab" class.on={gFob} onclick={handleGroupFob}>FOB</button>
+            <button class="gtab" class.on={gTier} onclick={handleGroupTier}>Tier</button>
+            <button class="gtab" class.on={gDelivery} onclick={handleGroupDelivery}>Delivery</button>
+            <button class="gtab" class.on={gNone} onclick={handleGroupNone}>None</button>
+        </div>
+    </div>
+
+    <!-- Bulk action bar (shown when rows selected) -->
+    <template if:true={showBulkBar}>
+        <div class="bulk-bar">
+            <lightning-icon icon-name="utility:check" size="x-small"></lightning-icon>
+            <span>{selectedCount} style(s) selected</span>
+            <template if:false={buyerMode}>
+                <button class="bulk-btn" onclick={handleClearSelection}>Clear selection</button>
+            </template>
+        </div>
+    </template>
+
+    <!-- ═══════════════════════════════════════════════════════════════════════
+         LOADING / ERROR / EMPTY STATES
+    ════════════════════════════════════════════════════════════════════════ -->
+    <template if:true={isLoading}>
+        <div class="state-panel">
+            <lightning-spinner size="medium" alternative-text="Loading assortment…"></lightning-spinner>
+            <p>Loading assortment data from Anaplan…</p>
+        </div>
+    </template>
+
+    <template if:true={error}>
+        <div class="state-panel error">
+            <lightning-icon icon-name="utility:error" size="small" variant="error"></lightning-icon>
+            <p>{error}</p>
+        </div>
+    </template>
+
+    <template if:true={showEmpty}>
+        <div class="state-panel">
+            <lightning-icon icon-name="utility:table" size="medium"></lightning-icon>
+            <p>No styles match the current filter.</p>
+            <button class="fpill" onclick={handleFilterAll}>Clear filter</button>
+        </div>
+    </template>
+
+    <!-- ═══════════════════════════════════════════════════════════════════════
+         DATA TABLE
+    ════════════════════════════════════════════════════════════════════════ -->
+    <template if:false={isLoading}>
+        <template if:false={showEmpty}>
+        <div class="table-scroll">
+            <table class="dw-table">
+                <thead>
+                    <tr>
+                        <!-- Select-all checkbox (non-buyer) -->
+                        <th class="col-check" rowspan="1">
+                            <template if:false={buyerMode}>
+                                <input type="checkbox" onchange={handleSelectAll} />
+                            </template>
+                        </th>
+                        <th class="col-seq">
+                            <button class={sortSeqClass} onclick={handleSortSeq}>
+                                #
+                                <lightning-icon icon-name={sortSeqIcon} size="x-small"></lightning-icon>
+                            </button>
+                        </th>
+                        <th class="col-style">Style</th>
+                        <th class="col-tier center">Tier</th>
+                        <th class="col-num right">
+                            <button class={sortUnitsClass} onclick={handleSortUnits}>
+                                Plan units
+                                <lightning-icon icon-name={sortUnitsIcon} size="x-small"></lightning-icon>
+                            </button>
+                        </th>
+                        <th class="col-num right">Target</th>
+                        <th class="col-num right">
+                            <button class={sortVarianceClass} onclick={handleSortVariance}>
+                                Var. %
+                                <lightning-icon icon-name={sortVarianceIcon} size="x-small"></lightning-icon>
+                            </button>
+                        </th>
+                        <th class="col-num right">Unit cost</th>
+                        <th class="col-num right">
+                            <button class={sortCostClass} onclick={handleSortCost}>
+                                Ext. cost
+                                <lightning-icon icon-name={sortCostIcon} size="x-small"></lightning-icon>
+                            </button>
+                        </th>
+                        <th class="col-doors">
+                            <button class={sortDoorsClass} onclick={handleSortDoors}>
+                                Doors
+                                <lightning-icon icon-name={sortDoorsIcon} size="x-small"></lightning-icon>
+                            </button>
+                        </th>
+                        <th class="col-delivery">Delivery</th>
+                        <th class="col-sizes center">Sizes</th>
+                        <template if:true={buyerMode}>
+                            <th class="col-bstatus center">Status</th>
+                        </template>
+                        <th class="col-note center">Note</th>
+                        <template if:false={buyerMode}>
+                            <th class="col-hero center">Hero</th>
+                        </template>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    <template for:each={groupedRows} for:item="row">
+
+                        <!-- GROUP HEADER ROW -->
+                        <template if:true={row.isGroup}>
+                            <tr key={row.id} class="group-row">
+                                <td colspan="13" class="group-cell">
+                                    <span class="group-label">{row.groupLabel}</span>
+                                    <span class="group-sub">{row.groupStyles}</span>
+                                    <span class="group-stat">{row.groupUnits} units</span>
+                                    <span class="group-stat">{row.groupExt}</span>
+                                    <span class={row.groupVarClass}>{row.groupVarFmt} vs target</span>
+                                </td>
+                            </tr>
+                        </template>
+
+                        <!-- GRAND TOTAL ROW -->
+                        <template if:true={row.isTotal}>
+                            <tr key={row.id} class="total-row">
+                                <td class="col-check"></td>
+                                <td class="col-seq"></td>
+                                <td class="total-label">TOTAL — {totalStyles} styles</td>
+                                <td class="col-tier"></td>
+                                <td class="col-num right bold">{totalUnits}</td>
+                                <td class="col-num right muted"></td>
+                                <td class="col-num right">
+                                    <span class={totalVsTargetVarChipClass}>{totalVsTarget}</span>
+                                </td>
+                                <td class="col-num right muted"></td>
+                                <td class="col-num right bold">{totalCost}</td>
+                                <td colspan="5"></td>
+                            </tr>
+                        </template>
+
+                        <!-- DATA ROW -->
+                        <template if:false={row.isGroup}>
+                            <template if:false={row.isTotal}>
+                                <tr key={row.id} class="data-row" class.hero-row={row.isHero}>
+
+                                    <!-- Checkbox -->
+                                    <td class="col-check">
+                                        <template if:false={buyerMode}>
+                                            <input
+                                                type="checkbox"
+                                                data-id={row.id}
+                                                checked={row.isSelected}
+                                                onchange={handleSelectRow}
+                                            />
+                                        </template>
+                                    </td>
+
+                                    <!-- Seq -->
+                                    <td class="col-seq muted">{row.seq}</td>
+
+                                    <!-- Style -->
+                                    <td class="col-style">
+                                        <div class="style-cell">
+                                            <template if:true={row.imageUrl}>
+                                                <img src={row.imageUrl} alt={row.productName} class="style-thumb" />
+                                            </template>
+                                            <template if:false={row.imageUrl}>
+                                                <div class="style-thumb-ph">
+                                                    <lightning-icon icon-name="utility:image" size="x-small"></lightning-icon>
+                                                </div>
+                                            </template>
+                                            <div class="style-info">
+                                                <div class="style-num">
+                                                    {row.styleNumber}
+                                                    <template if:true={row.isHero}>
+                                                        <span class="hero-star" title="Hero style">⭐</span>
+                                                    </template>
+                                                </div>
+                                                <div class="style-name">{row.productName}</div>
+                                                <div class="style-colorway">{row.colorway}</div>
+                                            </div>
+                                        </div>
+                                    </td>
+
+                                    <!-- Tier -->
+                                    <td class="col-tier center">
+                                        <span class={row.tierClass}>{row.tier}</span>
+                                    </td>
+
+                                    <!-- Plan units -->
+                                    <td class="col-num right bold">{row.plannedUnits}</td>
+
+                                    <!-- Target -->
+                                    <td class="col-num right muted">{row.targetUnits}</td>
+
+                                    <!-- Variance -->
+                                    <td class="col-num right">
+                                        <span class={row.varianceClass}>{row.varianceFmt}</span>
+                                    </td>
+
+                                    <!-- Unit cost -->
+                                    <td class="col-num right muted">{row.unitCostFmt}</td>
+
+                                    <!-- Ext cost -->
+                                    <td class="col-num right bold">{row.extCostFmt}</td>
+
+                                    <!-- Doors -->
+                                    <td class="col-doors">
+                                        <div class="door-wrap">
+                                            <div class="door-track">
+                                                <div class="door-fill" style={row.doorBarStyle}></div>
+                                            </div>
+                                            <span class="door-label muted">{row.doorLabel}</span>
+                                        </div>
+                                    </td>
+
+                                    <!-- Delivery -->
+                                    <td class="col-delivery muted">{row.deliveryWindow}</td>
+
+                                    <!-- Size run expand -->
+                                    <td class="col-sizes center">
+                                        <button
+                                            class="sizes-btn"
+                                            data-id={row.id}
+                                            onclick={handleToggleSizes}
+                                            title="Show/hide size run"
+                                        >
+                                            <lightning-icon
+                                                icon-name="utility:expand_alt"
+                                                size="x-small"
+                                            ></lightning-icon>
+                                        </button>
+                                    </td>
+
+                                    <!-- Buyer status (buyer mode) -->
+                                    <template if:true={buyerMode}>
+                                        <td class="col-bstatus center">
+                                            <lightning-combobox
+                                                variant="label-hidden"
+                                                value={row.buyerStatus}
+                                                options={buyerStatusOptions}
+                                                data-id={row.id}
+                                                onchange={handleBuyerStatusChange}
+                                                class="bstat-combo"
+                                            ></lightning-combobox>
+                                        </td>
+                                    </template>
+
+                                    <!-- Note -->
+                                    <td class="col-note center">
+                                        <button
+                                            class="note-btn"
+                                            class.has-note={row.salesRepNote}
+                                            data-id={row.id}
+                                            onclick={handleOpenNote}
+                                            title={row.salesRepNote}
+                                        >
+                                            <template lwc:if={row.salesRepNote}>
+                                                <lightning-icon icon-name="utility:note" size="x-small"></lightning-icon>
+                                            </template>
+                                            <template lwc:else>
+                                                <lightning-icon icon-name="utility:add" size="x-small"></lightning-icon>
+                                            </template>
+                                        </button>
+                                    </td>
+
+                                    <!-- Hero toggle (internal mode) -->
+                                    <template if:false={buyerMode}>
+                                        <td class="col-hero center">
+                                            <template if:false={isReadOnly}>
+                                                <button
+                                                    class="hero-btn"
+                                                    class.active={row.isHero}
+                                                    data-id={row.id}
+                                                    onclick={handleToggleHero}
+                                                    title="Toggle hero flag"
+                                                >
+                                                    <lightning-icon icon-name="utility:starred" size="x-small"></lightning-icon>
+                                                </button>
+                                            </template>
+                                            <template if:true={isReadOnly}>
+                                                <template if:true={row.isHero}>
+                                                    <span class="hero-star">⭐</span>
+                                                </template>
+                                            </template>
+                                        </td>
+                                    </template>
+
+                                </tr>
+
+                                <!-- SIZE RUN EXPANSION ROW -->
+                                <template if:true={row.sizesExpanded}>
+                                    <tr key={row.sizeRowKey} class="size-row">
+                                        <td colspan="13">
+                                            <div class="size-grid-wrap">
+                                                <span class="size-grid-label">Size run:</span>
+                                                <div class="size-grid">
+                                                    <template for:each={row.sizes} for:item="sz">
+                                                        <div key={sz.sizeCode} class="size-cell" class.core={sz.isCoreSize}>
+                                                            <div class="sz-code">{sz.sizeCode}</div>
+                                                            <div class="sz-units">{sz.plannedUnits}</div>
+                                                        </div>
+                                                    </template>
+                                                </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </template>
+
+                            </template>
+                        </template>
+
+                    </template>
+                </tbody>
+            </table>
+        </div>
+        </template>
+    </template>
+
+    <!-- ═══════════════════════════════════════════════════════════════════════
+         NOTE MODAL
+    ════════════════════════════════════════════════════════════════════════ -->
+    <template if:true={showNoteModal}>
+        <section class="modal-backdrop" role="dialog" aria-modal="true" aria-label="Annotation">
+            <div class="modal-card">
+                <div class="modal-hd">
+                    <template lwc:if={buyerMode}>
+                        <h2>Buyer note</h2>
+                    </template>
+                    <template lwc:else>
+                        <h2>Sales rep annotation</h2>
+                    </template>
+                    <button class="modal-x" onclick={handleCloseNote}>
+                        <lightning-icon icon-name="utility:close" size="x-small"></lightning-icon>
+                    </button>
+                </div>
+                <div class="modal-bd">
+                    <p class="modal-style">{editingLine.styleNumber} — {editingLine.productName}</p>
+                    <lightning-textarea
+                        label="Note"
+                        value={noteValue}
+                        onchange={handleNoteChange}
+                        placeholder="Add an annotation for this style…"
+                        max-length="2000"
+                    ></lightning-textarea>
+                </div>
+                <div class="modal-ft">
+                    <button class="btn-sec" onclick={handleCloseNote}>Cancel</button>
+                    <button class="btn-pri" onclick={handleSaveNote}>Save note</button>
+                </div>
+            </div>
+        </section>
+    </template>
+
+    <!-- ═══════════════════════════════════════════════════════════════════════
+         SHARE MODAL
+    ════════════════════════════════════════════════════════════════════════ -->
+    <template if:true={showShareModal}>
+        <section class="modal-backdrop" role="dialog" aria-modal="true" aria-label="Share assortment">
+            <div class="modal-card">
+                <div class="modal-hd">
+                    <h2>Share data wedge with buyer</h2>
+                    <button class="modal-x" onclick={handleCloseShare}>
+                        <lightning-icon icon-name="utility:close" size="x-small"></lightning-icon>
+                    </button>
+                </div>
+                <div class="modal-bd">
+                    <p class="share-note">
+                        Send this secure link to the buyer. They will see the full
+                        data wedge in read-only mode and can approve, flag, or drop
+                        individual styles and add buyer notes.
+                    </p>
+                    <div class="share-row">
+                        <input type="text" readonly value={shareUrl} class="share-input" />
+                        <button class="btn-pri" onclick={handleCopyLink}>Copy</button>
+                    </div>
+                    <p class="share-hint">
+                        <lightning-icon icon-name="utility:info" size="x-small"></lightning-icon>
+                        This link is unique and version-controlled. Locking the assortment
+                        will prevent further edits from being visible to the buyer.
+                    </p>
+                </div>
+                <div class="modal-ft">
+                    <button class="btn-sec" onclick={handleCloseShare}>Close</button>
+                </div>
+            </div>
+        </section>
+    </template>
+
+    <!-- ═══════════════════════════════════════════════════════════════════════
+         ANALYZE GAPS MODAL — AI-powered gap analysis
+    ════════════════════════════════════════════════════════════════════════ -->
+    <template if:true={showGapsModal}>
+        <section class="modal-backdrop" role="dialog" aria-modal="true" aria-label="Gap analysis">
+            <div class="modal-card modal-wide">
+                <div class="modal-hd">
+                    <div class="modal-hd-left">
+                        <lightning-icon icon-name="utility:einstein" size="small" class="einstein-icon"></lightning-icon>
+                        <h2>AI Gap Analysis</h2>
+                        <span class="ai-badge">Powered by Claude</span>
+                    </div>
+                    <button class="modal-x" onclick={handleCloseGaps}>
+                        <lightning-icon icon-name="utility:close" size="x-small"></lightning-icon>
+                    </button>
+                </div>
+
+                <!-- Context strip -->
+                <div class="gap-context-strip">
+                    <span class="gap-ctx">{planName}</span>
+                    <span class="gap-ctx-sep">·</span>
+                    <span class="gap-ctx">{totalStyles} styles</span>
+                    <span class="gap-ctx-sep">·</span>
+                    <span class={totalVsTargetGapCtxClass}>{totalVsTarget} vs target overall</span>
+                    <span class="gap-ctx-sep">·</span>
+                    <span class="gap-ctx" class.warn={belowTargetCount > 0}>{belowTargetCount} styles below target &gt;5%</span>
+                </div>
+
+                <div class="modal-bd gap-body">
+                    <!-- Loading state -->
+                    <template if:true={isAnalyzing}>
+                        <div class="gap-loading">
+                            <div class="gap-pulse"></div>
+                            <p class="gap-loading-text">Analysing assortment gaps across {totalStyles} styles…</p>
+                            <p class="gap-loading-sub">Claude is reviewing plan vs. target variances, door distribution, tier mix, and delivery windows.</p>
+                        </div>
+                    </template>
+
+                    <!-- Analysis result -->
+                    <template if:false={isAnalyzing}>
+                        <template if:true={gapAnalysis}>
+                            <!-- Summary card -->
+                            <div class="gap-summary-card">
+                                <div class="gap-summary-header">
+                                    <lightning-icon icon-name="utility:summary" size="x-small"></lightning-icon>
+                                    <span>Executive Summary</span>
+                                </div>
+                                <p class="gap-summary-text">{gapAnalysis.summary}</p>
+                            </div>
+
+                            <!-- Gap findings grid -->
+                            <div class="gap-section-label">Gap Findings</div>
+                            <div class="gap-findings">
+                                <template for:each={gapAnalysis.findings} for:item="finding">
+                                    <div key={finding.id} class={finding.cardClass}>
+                                        <div class="finding-header">
+                                            <span class={finding.severityClass}>{finding.severityLabel}</span>
+                                            <span class="finding-category">{finding.category}</span>
+                                        </div>
+                                        <div class="finding-title">{finding.title}</div>
+                                        <div class="finding-detail">{finding.detail}</div>
+                                        <div class="finding-action">
+                                            <lightning-icon icon-name="utility:right" size="x-small"></lightning-icon>
+                                            {finding.recommendedAction}
+                                        </div>
+                                    </div>
+                                </template>
+                            </div>
+
+                            <!-- Style-level recommendations table -->
+                            <template if:true={gapAnalysis.styleRecs}>
+                                <div class="gap-section-label">Style-Level Recommendations</div>
+                                <table class="gap-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Style</th>
+                                            <th class="right">Plan</th>
+                                            <th class="right">Target</th>
+                                            <th class="right">Gap</th>
+                                            <th>Recommendation</th>
+                                            <th class="center">Priority</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <template for:each={gapAnalysis.styleRecs} for:item="rec">
+                                            <tr key={rec.styleNumber}>
+                                                <td>
+                                                    <div class="rec-style">{rec.styleNumber}</div>
+                                                    <div class="rec-name">{rec.productName}</div>
+                                                </td>
+                                                <td class="right bold">{rec.plannedUnits}</td>
+                                                <td class="right muted">{rec.targetUnits}</td>
+                                                <td class="right">
+                                                    <span class={rec.varianceClass}>{rec.varianceFmt}</span>
+                                                </td>
+                                                <td class="rec-action">{rec.recommendation}</td>
+                                                <td class="center">
+                                                    <span class={rec.priorityClass}>{rec.priority}</span>
+                                                </td>
+                                            </tr>
+                                        </template>
+                                    </tbody>
+                                </table>
+                            </template>
+
+                            <!-- AI disclaimer -->
+                            <div class="gap-disclaimer">
+                                <lightning-icon icon-name="utility:info" size="x-small"></lightning-icon>
+                                AI-generated analysis based on plan vs. target data. Review all recommendations with the account team before making commitments.
+                            </div>
+                        </template>
+
+                        <!-- Error state -->
+                        <template if:true={gapError}>
+                            <div class="gap-error">
+                                <lightning-icon icon-name="utility:error" size="small" variant="error"></lightning-icon>
+                                <p>{gapError}</p>
+                                <button class="btn-pri" onclick={handleAnalyzeGaps}>Retry</button>
+                            </div>
+                        </template>
+                    </template>
+                </div>
+
+                <div class="modal-ft">
+                    <button class="btn-sec" onclick={handleCloseGaps}>Close</button>
+                    <template if:true={gapAnalysis}>
+                        <button class="btn-ghost" onclick={handleExportGaps}>
+                            <lightning-icon icon-name="utility:download" size="x-small"></lightning-icon>
+                            Export analysis
+                        </button>
+                    </template>
+                    <template if:false={isAnalyzing}>
+                        <button class="btn-analyze" onclick={handleAnalyzeGaps}>
+                            <lightning-icon icon-name="utility:refresh" size="x-small"></lightning-icon>
+                            Re-analyze
+                        </button>
+                    </template>
+                </div>
+            </div>
+        </section>
+    </template>
+
+    <!-- ═══════════════════════════════════════════════════════════════════════
+         CONVERT TO ORDER MODAL
+    ════════════════════════════════════════════════════════════════════════ -->
+    <template if:true={showConvertModal}>
+        <section class="modal-backdrop" role="dialog" aria-modal="true" aria-label="Convert to order">
+            <div class="modal-card">
+                <div class="modal-hd">
+                    <h2>Convert Assortment to Order</h2>
+                    <button class="modal-x" onclick={handleCloseConvert}>
+                        <lightning-icon icon-name="utility:close" size="x-small"></lightning-icon>
+                    </button>
+                </div>
+                <div class="modal-bd">
+
+                    <!-- Summary of what will be ordered -->
+                    <div class="convert-summary">
+                        <div class="convert-kpi">
+                            <span class="ck-val">{convertStyleCount}</span>
+                            <span class="ck-lbl">Styles</span>
+                        </div>
+                        <div class="convert-kpi">
+                            <span class="ck-val">{convertUnitCount}</span>
+                            <span class="ck-lbl">Units</span>
+                        </div>
+                        <div class="convert-kpi">
+                            <span class="ck-val">{convertTotalCost}</span>
+                            <span class="ck-lbl">Wholesale cost</span>
+                        </div>
+                    </div>
+
+                    <!-- Dropped styles warning -->
+                    <template if:true={hasDroppedStyles}>
+                        <div class="convert-warn">
+                            <lightning-icon icon-name="utility:warning" size="x-small" variant="warning"></lightning-icon>
+                            <span>{droppedStyleCount} style(s) marked as Dropped by the buyer will be excluded from the order.</span>
+                        </div>
+                    </template>
+
+                    <!-- Flagged styles warning -->
+                    <template if:true={hasFlaggedStyles}>
+                        <div class="convert-warn flagged">
+                            <lightning-icon icon-name="utility:warning" size="x-small"></lightning-icon>
+                            <span>{flaggedStyleCount} style(s) flagged for discussion — include or exclude them below.</span>
+                        </div>
+                    </template>
+
+                    <!-- Flagged style handling -->
+                    <template if:true={hasFlaggedStyles}>
+                        <div class="convert-option">
+                            <label class="option-label">Flagged styles:</label>
+                            <div class="option-group">
+                                <label class="radio-label">
+                                    <input type="radio" name="flaggedOpt" value="include"
+                                           checked={includeFlagged}
+                                           onchange={handleFlaggedOption} />
+                                    Include in order (resolve later)
+                                </label>
+                                <label class="radio-label">
+                                    <input type="radio" name="flaggedOpt" value="exclude"
+                                           checked={excludeFlagged}
+                                           onchange={handleFlaggedOption} />
+                                    Exclude from order
+                                </label>
+                            </div>
+                        </div>
+                    </template>
+
+                    <!-- Order details -->
+                    <div class="convert-fields">
+                        <lightning-input
+                            label="Purchase Order Number"
+                            value={orderPONumber}
+                            onchange={handlePOChange}
+                            placeholder="e.g. PO-2026-NORDSTROM-001"
+                            required
+                        ></lightning-input>
+                        <lightning-input
+                            type="date"
+                            label="Requested Delivery Date"
+                            value={orderDeliveryDate}
+                            onchange={handleDeliveryDateChange}
+                        ></lightning-input>
+                        <lightning-textarea
+                            label="Order Notes"
+                            value={orderNotes}
+                            onchange={handleOrderNotesChange}
+                            placeholder="Any special instructions for this order…"
+                            max-length="500"
+                        ></lightning-textarea>
+                    </div>
+
+                    <!-- Conversion result — success -->
+                    <template if:true={convertSuccess}>
+                        <div class="convert-success">
+                            <lightning-icon icon-name="utility:success" size="small" variant="success"></lightning-icon>
+                            <div>
+                                <p class="success-title">Order created successfully</p>
+                                <p class="success-detail">Order <strong>{createdOrderId}</strong> has been created in B2B Commerce and submitted to SAP for fulfilment.</p>
+                            </div>
+                        </div>
+                    </template>
+
+                    <!-- Conversion error -->
+                    <template if:true={convertError}>
+                        <div class="convert-error-msg">
+                            <lightning-icon icon-name="utility:error" size="x-small" variant="error"></lightning-icon>
+                            <span>{convertError}</span>
+                        </div>
+                    </template>
+
+                </div>
+                <div class="modal-ft">
+                    <template if:false={convertSuccess}>
+                        <button class="btn-sec" onclick={handleCloseConvert} disabled={isConverting}>Cancel</button>
+                        <button
+                            class="btn-convert"
+                            onclick={handleSubmitConvert}
+                            disabled={isConverting}
+                        >
+                            <template if:false={isConverting}>
+                                <lightning-icon icon-name="utility:cart" size="x-small"></lightning-icon>
+                                Create Order in B2B Commerce
+                            </template>
+                            <template if:true={isConverting}>
+                                <lightning-spinner size="x-small" alternative-text="Creating order…"></lightning-spinner>
+                                Creating order…
+                            </template>
+                        </button>
+                    </template>
+                    <template if:true={convertSuccess}>
+                        <button class="btn-sec" onclick={handleCloseConvert}>Close</button>
+                        <button class="btn-pri" onclick={handleViewOrder}>View order</button>
+                    </template>
+                </div>
+            </div>
+        </section>
+    </template>
+
+</div>
+</template>

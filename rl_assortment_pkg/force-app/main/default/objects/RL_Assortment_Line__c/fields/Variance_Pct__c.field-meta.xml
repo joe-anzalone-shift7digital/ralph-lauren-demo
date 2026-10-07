@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Variance_Pct__c</fullName>
+    <description>Percentage variance against target</description>
+    <label>Variance %</label>
+    <trackHistory>false</trackHistory>
+    <formula>IF(Target_Units__c > 0, (Planned_Units__c - Target_Units__c) / Target_Units__c * 100, 0)</formula><formulaTreatBlanksAs>BlankAsZero</formulaTreatBlanksAs><precision>18</precision><scale>2</scale>
+    <type>Percent</type>
+</CustomField>

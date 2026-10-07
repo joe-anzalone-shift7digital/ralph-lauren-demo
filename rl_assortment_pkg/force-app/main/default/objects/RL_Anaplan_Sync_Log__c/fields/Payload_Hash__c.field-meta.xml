@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Payload_Hash__c</fullName>
+    <description>SHA-256 hash of the incoming payload used to detect and skip duplicate sync events</description>
+    <label>Payload Hash</label>
+    <trackHistory>false</trackHistory>
+    <length>64</length>
+    <type>Text</type>
+</CustomField>

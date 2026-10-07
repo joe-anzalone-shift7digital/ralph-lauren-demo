@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Product__c</fullName>
+    <description>SF Product2 record for this style</description>
+    <label>Product</label>
+    <trackHistory>false</trackHistory>
+    <referenceTo>Product2</referenceTo><relationshipLabel>Product</relationshipLabel><relationshipName>AssortmentLines</relationshipName>
+    <type>Lookup</type>
+</CustomField>

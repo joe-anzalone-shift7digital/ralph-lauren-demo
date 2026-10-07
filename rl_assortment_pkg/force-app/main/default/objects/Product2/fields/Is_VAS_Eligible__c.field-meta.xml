@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Is_VAS_Eligible__c</fullName>
+    <description>Product supports value-added services such as embroidery or heat transfer</description>
+    <label>VAS / Embroidery Eligible</label>
+    <trackHistory>false</trackHistory>
+    <defaultValue>false</defaultValue>
+    <type>Checkbox</type>
+</CustomField>

@@ -64,7 +64,7 @@ public without sharing class RLAssortmentController {
     //   Wire-compatible (cacheable). Returns all line items for a plan,
     //   with plan header fields repeated on each DTO (LWC reads from first).
     // ═════════════════════════════════════════════════════════════════════════
-    @AuraEnabled(cacheable=true)
+    @AuraEnabled(cacheable=false)
     public static List<AssortmentLineDTO> getAssortmentLines(Id planId) {
         if (planId == null) {
             return new List<AssortmentLineDTO>();
@@ -153,7 +153,7 @@ public without sharing class RLAssortmentController {
     //   every line item in a plan. The LWC groups them client-side by lineId.
     //   Called by rlDataWedge for the size-run drill-down rows.
     // ═════════════════════════════════════════════════════════════════════════
-    @AuraEnabled(cacheable=true)
+    @AuraEnabled(cacheable=false)
     public static List<SizeRunDTO> getSizeRunsForPlan(Id planId) {
         if (planId == null) {
             return new List<SizeRunDTO>();

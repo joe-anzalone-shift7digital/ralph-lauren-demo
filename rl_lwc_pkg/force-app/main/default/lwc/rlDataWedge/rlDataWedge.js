@@ -9,6 +9,7 @@ import updateLineField      from '@salesforce/apex/RLAssortmentController.update
 import lockAssortmentPlan   from '@salesforce/apex/RLAssortmentController.lockAssortmentPlan';
 import generateShareToken   from '@salesforce/apex/RLAssortmentController.generateShareToken';
 import getSizeRuns          from '@salesforce/apex/RLAssortmentController.getSizeRunsForPlan';
+import convertToOrder       from '@salesforce/apex/RLAssortmentController.convertToOrder';
 
 // ── Constants ─────────────────────────────────────────────────────────────────
 const SORT_SEQ      = 'seq';
@@ -516,6 +517,37 @@ export default class RlDataWedge extends NavigationMixin(LightningElement) {
         this.showBulkBar = false;
         this.allLines = this.allLines.map(l => ({ ...l, isSelected: false }));
         this._rebuild();
+    }
+
+    async handleConvertToOrder() {
+        const selectedIds = Array.from(this.selectedLines);
+        if (selectedIds.length === 0) {
+            this._toast('No Selection', 'Please select items to convert to order.', 'error');
+            return;
+        }
+
+        this.isSaving = true;
+        try {
+            const orderId = await convertToOrder({
+                planId: this._effectiveRecordId,
+                selectedLineIds: selectedIds
+            });
+            this._toast('Success', `Order ${orderId} created with ${selectedIds.length} items.`, 'success');
+            this.handleClearSelection();
+            // Optionally navigate to the new order
+            this[NavigationMixin.Navigate]({
+                type: 'standard__recordPage',
+                attributes: {
+                    recordId: orderId,
+                    objectApiName: 'Order',
+                    actionName: 'view'
+                }
+            });
+        } catch (e) {
+            this._toast('Error', e?.body?.message || 'Failed to create order.', 'error');
+        } finally {
+            this.isSaving = false;
+        }
     }
 
     // ── Size run expand/collapse ───────────────────────────────────────────────

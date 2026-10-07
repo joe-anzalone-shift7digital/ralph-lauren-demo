@@ -331,6 +331,53 @@ public without sharing class RLAssortmentController {
         return plan.Shared_Link_Token__c;
     }
 
+    // ═════════════════════════════════════════════════════════════════════════
+    // convertToOrder
+    //   Creates a new Order with OrderItems from selected assortment lines
+    // ═════════════════════════════════════════════════════════════════════════
+    @AuraEnabled
+    public static String convertToOrder(Id planId, List<Id> selectedLineIds) {
+        if (selectedLineIds == null || selectedLineIds.isEmpty()) {
+            throw new AuraHandledException('No items selected');
+        }
+
+        RL_Assortment_Plan__c plan = [
+            SELECT Id, Account__c, Season__c
+            FROM RL_Assortment_Plan__c
+            WHERE Id = :planId
+            LIMIT 1
+        ];
+
+        List<RL_Assortment_Line__c> lines = [
+            SELECT Id, Product__c, Planned_Units__c, Wholesale_Unit_Cost__c, Extended_Cost__c
+            FROM RL_Assortment_Line__c
+            WHERE Id IN :selectedLineIds AND Assortment_Plan__c = :planId
+        ];
+
+        Order order = new Order(
+            AccountId = plan.Account__c,
+            EffectiveDate = Date.today(),
+            Status = 'Draft'
+        );
+        insert order;
+
+        List<OrderItem> items = new List<OrderItem>();
+        for (RL_Assortment_Line__c line : lines) {
+            items.add(new OrderItem(
+                OrderId = order.Id,
+                Product2Id = line.Product__c,
+                Quantity = line.Planned_Units__c != null ? Integer.valueOf(line.Planned_Units__c) : 1,
+                UnitPrice = line.Wholesale_Unit_Cost__c != null ? line.Wholesale_Unit_Cost__c : 0
+            ));
+        }
+
+        if (!items.isEmpty()) {
+            insert items;
+        }
+
+        return order.Id;
+    }
+
     // ── Private: UUID v4 token generator ─────────────────────────────────────
     private static String generateToken() {
         String hex = EncodingUtil.convertToHex(Crypto.generateAesKey(128));

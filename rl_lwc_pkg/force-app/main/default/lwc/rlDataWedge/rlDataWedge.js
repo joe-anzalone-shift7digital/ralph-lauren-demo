@@ -366,6 +366,7 @@ export default class RlDataWedge extends NavigationMixin(LightningElement) {
     get isReadOnly()  { return this.buyerMode || this.isLocked; }
     get showEmpty()   { return !this.isLoading && this.displayLines.length === 0; }
     get selectedCount() { return this.selectedLines.size; }
+    get isConvertDisabled() { return this.selectedCount === 0; }
 
     // Convert modal computed getters
     get _orderableLines() {

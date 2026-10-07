@@ -56,6 +56,17 @@
                     Analyzing…
                 </template>
             </button>
+            <!-- Convert to Order -->
+            <button class="hbtn" onclick={handleConvertToOrder} disabled={isConvertDisabled} title="Convert selected items to order">
+                <template if:false={isSaving}>
+                    <lightning-icon icon-name="utility:new_window" size="x-small"></lightning-icon>
+                    Convert to Order
+                </template>
+                <template if:true={isSaving}>
+                    <lightning-spinner size="x-small" alternative-text="Converting…"></lightning-spinner>
+                    Converting…
+                </template>
+            </button>
             <button class="hbtn-icon" onclick={handleExportCsv} title="Export to CSV">
                 <lightning-icon icon-name="utility:download" size="x-small"></lightning-icon>
             </button>
@@ -148,10 +159,6 @@
         <div class="bulk-bar">
             <lightning-icon icon-name="utility:check" size="x-small"></lightning-icon>
             <span>{selectedCount} style(s) selected</span>
-            <button class="bulk-btn" onclick={handleConvertToOrder} disabled={isSaving}>
-                <lightning-icon icon-name="utility:new_window" size="x-small"></lightning-icon>
-                Convert to Order
-            </button>
             <template if:false={buyerMode}>
                 <button class="bulk-btn" onclick={handleClearSelection}>Clear selection</button>
             </template>

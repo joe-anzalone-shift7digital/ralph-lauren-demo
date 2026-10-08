@@ -43,6 +43,13 @@ public without sharing class DocuSignService {
         String signerEmail,
         String signerName
     ) {
+        // If email/name not provided, use current user's info
+        if (String.isBlank(signerEmail)) {
+            signerEmail = UserInfo.getUserEmail();
+        }
+        if (String.isBlank(signerName)) {
+            signerName = UserInfo.getName();
+        }
         SigningResponse response = new SigningResponse();
 
         try {

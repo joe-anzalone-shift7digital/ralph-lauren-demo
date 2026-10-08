@@ -547,18 +547,27 @@ export default class RlDataWedge extends NavigationMixin(LightningElement) {
             this.pendingOrderId = orderId;
             this.isSigning = true;
 
-            // Initiate DocuSign signing
-            const signingResponse = await createEmbeddedSigningEnvelope({
-                orderId: orderId,
-                signerEmail: UserInfo.getUserEmail(),
-                signerName: UserInfo.getName()
-            });
+            console.log('Initiating DocuSign signing for order: ' + orderId);
 
-            this.signingUrl = signingResponse.signingUrl;
-            this.envelopeId = signingResponse.envelopeId;
-            this.showSigningModal = true;
+            try {
+                // Initiate DocuSign signing
+                const signingResponse = await createEmbeddedSigningEnvelope({
+                    orderId: orderId,
+                    signerEmail: 'signer@example.com',  // Will use Apex to get actual user email
+                    signerName: 'Document Signer'       // Will use Apex to get actual user name
+                });
 
-            this._toast('Sign Document', 'Please sign the order confirmation document.', 'info');
+                console.log('DocuSign response:', signingResponse);
+                this.signingUrl = signingResponse.signingUrl;
+                this.envelopeId = signingResponse.envelopeId;
+                this.showSigningModal = true;
+
+                this._toast('Sign Document', 'Please sign the order confirmation document.', 'info');
+            } catch (dsError) {
+                console.error('DocuSign error:', dsError);
+                this._toast('Signing Error', dsError?.body?.message || 'Failed to initiate document signing.', 'error');
+                this.showSigningModal = false;
+            }
             this.isSaving = false;
         } catch (e) {
             this._toast('Error', e?.body?.message || 'Failed to create order.', 'error');

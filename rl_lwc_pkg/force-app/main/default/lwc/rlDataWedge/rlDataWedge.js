@@ -10,7 +10,7 @@ import lockAssortmentPlan   from '@salesforce/apex/RLAssortmentController.lockAs
 import generateShareToken   from '@salesforce/apex/RLAssortmentController.generateShareToken';
 import getSizeRuns          from '@salesforce/apex/RLAssortmentController.getSizeRunsForPlan';
 import convertToOrder       from '@salesforce/apex/RLAssortmentController.convertToOrder';
-// import createEmbeddedSigningEnvelope from '@salesforce/apex/DocuSignService.createEmbeddedSigningEnvelope';
+import createEmbeddedSigningEnvelope from '@salesforce/apex/DocuSignService.createEmbeddedSigningEnvelope';
 
 // ── Constants ─────────────────────────────────────────────────────────────────
 const SORT_SEQ      = 'seq';
@@ -543,10 +543,6 @@ export default class RlDataWedge extends NavigationMixin(LightningElement) {
                 selectedLineIds: selectedIds
             });
 
-            // TODO: Enable DocuSign signing when configured
-            // Uncomment below after setting up DocuSign API credentials
-
-            /*
             // Store order ID and show signing modal
             this.pendingOrderId = orderId;
             this.isSigning = true;
@@ -563,22 +559,7 @@ export default class RlDataWedge extends NavigationMixin(LightningElement) {
             this.showSigningModal = true;
 
             this._toast('Sign Document', 'Please sign the order confirmation document.', 'info');
-            */
-
-            // For now, just create the order without signing
-            this._toast('Success', `Order ${orderId} created with ${selectedIds.length} items.`, 'success');
-            this.handleClearSelection();
             this.isSaving = false;
-
-            // Navigate to the order
-            this[NavigationMixin.Navigate]({
-                type: 'standard__recordPage',
-                attributes: {
-                    recordId: orderId,
-                    objectApiName: 'Order',
-                    actionName: 'view'
-                }
-            });
         } catch (e) {
             this._toast('Error', e?.body?.message || 'Failed to create order.', 'error');
             this.isSaving = false;

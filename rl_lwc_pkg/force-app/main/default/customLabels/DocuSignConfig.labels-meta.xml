@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomLabels xmlns="http://soap.sforce.com/2006/04/metadata">
+    <labels>
+        <fullName>DocuSign_Account_Id</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>DocuSign Account ID</shortDescription>
+        <value>137f3cd8-8cd0-42f5-903e-ff00abea85c1</value>
+    </labels>
+    <labels>
+        <fullName>DocuSign_Client_Id</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>DocuSign Integration Key</shortDescription>
+        <value>06da4699-a0b7-4901-b506-49701374c946</value>
+    </labels>
+    <labels>
+        <fullName>DocuSign_Client_Secret</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>DocuSign Client Secret</shortDescription>
+        <value>bacf0f72-8c84-4e94-851f-49044e385705</value>
+    </labels>
+    <labels>
+        <fullName>DocuSign_Base_Url</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>DocuSign Base URL</shortDescription>
+        <value>https://na3.docusign.net/restapi</value>
+    </labels>
+</CustomLabels>

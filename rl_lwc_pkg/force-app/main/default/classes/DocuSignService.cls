@@ -143,8 +143,9 @@ public without sharing class DocuSignService {
         String signerName
     ) {
         // Create recipient view request
+        String returnUrl = System.URL.getOrgDomainUrl().toExternalForm() + '/lightning/r/Order/';
         Map<String, Object> recipientView = new Map<String, Object>{
-            'returnUrl' => Url.getSalesforceBaseUrl().toExternalForm() + '/lightning/r/Order/',
+            'returnUrl' => returnUrl,
             'authenticationMethod' => 'none',
             'email' => signerEmail,
             'userName' => signerName,

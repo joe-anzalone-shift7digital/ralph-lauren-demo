@@ -26,6 +26,6 @@
         <language>en_US</language>
         <protected>false</protected>
         <shortDescription>DocuSign Base URL</shortDescription>
-        <value>https://na3.docusign.net/restapi</value>
+        <value>https://demo.docusign.net/restapi</value>
     </labels>
 </CustomLabels>

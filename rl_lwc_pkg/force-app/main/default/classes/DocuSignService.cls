@@ -87,6 +87,9 @@ public without sharing class DocuSignService {
             Http http = new Http();
             HttpResponse httpResponse = http.send(request);
 
+            System.debug('Envelope Creation Status: ' + httpResponse.getStatusCode());
+            System.debug('Envelope Creation Response: ' + httpResponse.getBody());
+
             if (httpResponse.getStatusCode() == 201) {
                 Map<String, Object> result = (Map<String, Object>) JSON.deserializeUntyped(
                     httpResponse.getBody()
@@ -104,7 +107,7 @@ public without sharing class DocuSignService {
                 );
             } else {
                 throw new AuraHandledException(
-                    'Failed to create DocuSign envelope: ' + httpResponse.getStatus()
+                    'DocuSign envelope creation failed (' + httpResponse.getStatusCode() + '): ' + httpResponse.getBody()
                 );
             }
         } catch (Exception e) {
@@ -118,25 +121,41 @@ public without sharing class DocuSignService {
      * getAccessToken - Obtain OAuth token from DocuSign
      */
     private static String getAccessToken(DocuSignConfig config) {
-        HttpRequest request = new HttpRequest();
-        request.setMethod('POST');
-        request.setEndpoint('https://account-d.docusign.com/oauth/token');
-        request.setHeader('Content-Type', 'application/x-www-form-urlencoded');
+        try {
+            HttpRequest request = new HttpRequest();
+            request.setMethod('POST');
+            request.setEndpoint('https://account-d.docusign.com/oauth/token');
+            request.setHeader('Content-Type', 'application/x-www-form-urlencoded');
 
-        String body = 'grant_type=client_credentials&client_id=' +
-            EncodingUtil.urlEncode(config.clientId, 'UTF-8') +
-            '&client_secret=' +
-            EncodingUtil.urlEncode(config.clientSecret, 'UTF-8') +
-            '&scope=signature';
-        request.setBody(body);
+            String body = 'grant_type=client_credentials&client_id=' +
+                EncodingUtil.urlEncode(config.clientId, 'UTF-8') +
+                '&client_secret=' +
+                EncodingUtil.urlEncode(config.clientSecret, 'UTF-8') +
+                '&scope=signature';
+            request.setBody(body);
+            request.setTimeout(120000);
 
-        Http http = new Http();
-        HttpResponse response = http.send(request);
+            Http http = new Http();
+            HttpResponse response = http.send(request);
 
-        Map<String, Object> result = (Map<String, Object>) JSON.deserializeUntyped(
-            response.getBody()
-        );
-        return (String) result.get('access_token');
+            System.debug('OAuth Response Status: ' + response.getStatusCode());
+            System.debug('OAuth Response Body: ' + response.getBody());
+
+            if (response.getStatusCode() != 200) {
+                throw new AuraHandledException(
+                    'DocuSign OAuth failed: ' + response.getStatusCode() + ' - ' + response.getBody()
+                );
+            }
+
+            Map<String, Object> result = (Map<String, Object>) JSON.deserializeUntyped(
+                response.getBody()
+            );
+            return (String) result.get('access_token');
+        } catch (Exception e) {
+            System.debug('ERROR in getAccessToken: ' + e.getMessage());
+            System.debug('Stack: ' + e.getStackTraceString());
+            throw new AuraHandledException('Failed to get DocuSign access token: ' + e.getMessage());
+        }
     }
 
     /**

@@ -12,14 +12,14 @@
         <language>en_US</language>
         <protected>false</protected>
         <shortDescription>DocuSign Integration Key</shortDescription>
-        <value>06da4699-a0b7-4901-b506-49701374c946</value>
+        <value>2193de06-7ace-4e1d-a801-0a579ec86435</value>
     </labels>
     <labels>
         <fullName>DocuSign_Client_Secret</fullName>
         <language>en_US</language>
         <protected>true</protected>
         <shortDescription>DocuSign Client Secret</shortDescription>
-        <value>b73e640a-834b-4668-b185-8f767338474b</value>
+        <value>263a837c-5247-4f7c-9ff2-664452f6db6e</value>
     </labels>
     <labels>
         <fullName>DocuSign_Base_Url</fullName>
